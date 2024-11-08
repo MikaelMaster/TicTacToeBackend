@@ -1,7 +1,5 @@
 @file:Suppress("WARNINGS")
 
-val logback_version: String by project
-
 plugins {
     kotlin("jvm") version "2.0.21"
     id("io.ktor.plugin") version "3.0.1"
@@ -20,22 +18,41 @@ application {
 
 repositories {
     mavenCentral()
+    maven("https://oss.sonatype.org/")
 }
 
+val exposed_version: String by project
+
 dependencies {
+    // Ktor server
     implementation("io.ktor:ktor-server-core-jvm")
     implementation("io.ktor:ktor-server-auth-jvm")
-    implementation("io.ktor:ktor-client-core-jvm")
-    implementation("io.ktor:ktor-client-apache-jvm")
+    implementation("io.ktor:ktor-server-netty-jvm")
     implementation("io.ktor:ktor-server-double-receive-jvm")
-    implementation("io.github.cotrin8672:ktor-line-webhook-plugin:1.5.0")
     implementation("io.ktor:ktor-server-host-common-jvm")
     implementation("io.ktor:ktor-server-status-pages-jvm")
     implementation("io.ktor:ktor-server-content-negotiation-jvm")
     implementation("io.ktor:ktor-serialization-kotlinx-json-jvm")
-    implementation("org.jetbrains.exposed:exposed-core:0.53.0")
-    implementation("org.jetbrains.exposed:exposed-jdbc:0.53.0")
+
+    // Ktor server (WebSockets)
     implementation("io.ktor:ktor-server-websockets-jvm")
-    implementation("io.ktor:ktor-server-netty-jvm")
-    implementation("ch.qos.logback:logback-classic:$logback_version")
+
+    // Ktor client
+    implementation("io.ktor:ktor-client-core-jvm")
+    implementation("io.ktor:ktor-client-apache-jvm")
+
+    // Exposed
+    implementation("org.jetbrains.exposed:exposed-core:${exposed_version}")
+    implementation("org.jetbrains.exposed:exposed-dao:${exposed_version}")
+    implementation("org.jetbrains.exposed:exposed-jdbc:${exposed_version}")
+
+    // Database drivers
+    implementation("com.mysql:mysql-connector-j:9.0.0") // MySQL
+    implementation("org.mariadb.jdbc:mariadb-java-client:3.5.0") // MariaDB
+
+    // Logging
+    implementation("ch.qos.logback:logback-classic:1.5.12")
+
+    // Dotenv
+    implementation("io.github.cdimascio:dotenv-kotlin:6.4.2")
 }

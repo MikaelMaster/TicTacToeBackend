@@ -2,6 +2,7 @@ package com.mikael.tictactoebackend
 
 import com.mikael.tictactoebackend.routing.game.gameRouting
 import com.mikael.tictactoebackend.routing.match.matchRouting
+import io.github.cdimascio.dotenv.dotenv
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
@@ -36,11 +37,13 @@ open class Response(val success: Boolean)
 data class ErrorResponse(val error: String) : Response(false)
 // Basic response models - End
 
+private val serverDotEnv = dotenv() // Load environment variables.
+
 fun main() {
     embeddedServer(
         Netty,
-        port = 8081,
-        host = "0.0.0.0",
+        host = serverDotEnv["RUNNING_HOST"]!!,
+        port = serverDotEnv["RUNNING_PORT"]!!.toInt(),
         module = Application::module
     ).start(wait = true)
 }
@@ -82,6 +85,11 @@ fun Application.module() {
     }
 }
 
+/**
+ * Invalid route handler. Responds with a 404 status code and an error message.
+ *
+ * @see ErrorResponse
+ */
 private fun Route.invalidRoute() {
     route("{...}") {
         get {
