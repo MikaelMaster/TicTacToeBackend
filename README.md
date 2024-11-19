@@ -4,7 +4,7 @@ This is the backend for a project I worked on, built with Ktor and WebSockets. W
 <br>
 This project was developed primarily as part of my **portfolio** to showcase my skills in building backend solutions for real-time applications. 📂
 
-You can check out the frontend here: [TicTacToe Frontend](https://github.com/Mikaelmaster/tictactoe-frontend). 🎮
+You can check out the frontend here: [TicTacToe Frontend](https://github.com/MikaelMaster/TicTacToeFrontend). 🎮
 
 ### About Access to the Game 🚪
 At the moment, the game is not hosted, so you can't play it online yet. However, I plan to host it in the future so everyone can join the fun. 🌍
