@@ -1,6 +1,7 @@
 # TicTacToeBackend - Backend for Tic Tac Toe Game 🕹️
 
 This is the backend for a project I worked on, built with Ktor and WebSockets. While I already have extensive experience working with Ktor and building REST APIs, this project served as a great opportunity for me to dive into **WebSockets** specifically, and learn how to handle real-time communication in Ktor. 🔥
+<br>
 This project was developed primarily as part of my **portfolio** to showcase my skills in building backend solutions for real-time applications. 📂
 
 You can check out the frontend here: [TicTacToe Frontend](https://github.com/Mikaelmaster/tictactoe-frontend). 🎮
