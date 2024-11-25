@@ -1,5 +1,6 @@
 package com.mikael.tictactoebackend
 
+import com.mikael.tictactoebackend.db.DatabaseUtils
 import com.mikael.tictactoebackend.routing.game.gameRouting
 import com.mikael.tictactoebackend.routing.match.matchRouting
 import io.github.cdimascio.dotenv.dotenv
@@ -37,7 +38,7 @@ open class Response(val success: Boolean)
 data class ErrorResponse(val error: String) : Response(false)
 // Basic response models - End
 
-private val serverDotEnv = dotenv() // Load environment variables.
+internal val serverDotEnv = dotenv() // Load environment variables.
 
 fun main() {
     embeddedServer(
@@ -70,6 +71,10 @@ fun Application.module() {
         }
     }
 
+    // Database
+    DatabaseUtils.prepareDB()
+
+    // Routing
     routing {
         route("/match") {
             matchRouting()
