@@ -1,7 +1,6 @@
 package com.mikael.tictactoebackend.db
 
 import com.mikael.tictactoebackend.db.schema.match.MatchesTable
-import com.mikael.tictactoebackend.db.schema.match.result.MatchesResultsTable
 import com.mikael.tictactoebackend.db.schema.user.UsersTable
 import com.mikael.tictactoebackend.serverDotEnv
 import kotlinx.coroutines.Dispatchers
@@ -52,8 +51,7 @@ object DatabaseUtils {
         transaction {
             SchemaUtils.create(
                 UsersTable,
-                MatchesTable,
-                MatchesResultsTable
+                MatchesTable
             )
         }
     }

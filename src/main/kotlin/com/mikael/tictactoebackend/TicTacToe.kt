@@ -1,8 +1,11 @@
 package com.mikael.tictactoebackend
 
+import com.github.benmanes.caffeine.cache.Cache
+import com.github.benmanes.caffeine.cache.Caffeine
 import com.mikael.tictactoebackend.db.DatabaseUtils
 import com.mikael.tictactoebackend.routing.game.gameRouting
 import com.mikael.tictactoebackend.routing.match.matchRouting
+import io.github.cdimascio.dotenv.Dotenv
 import io.github.cdimascio.dotenv.dotenv
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
@@ -16,6 +19,7 @@ import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import java.util.concurrent.TimeUnit
 import kotlin.time.Duration.Companion.seconds
 
 // Basic response models - Start
@@ -38,7 +42,13 @@ open class Response(val success: Boolean)
 data class ErrorResponse(val error: String) : Response(false)
 // Basic response models - End
 
-internal val serverDotEnv = dotenv() // Load environment variables.
+// Load environment variables.
+internal val serverDotEnv: Dotenv = dotenv()
+
+// Cache for storing logged in users tokens.
+val tokensCache: Cache<String, Long> = Caffeine.newBuilder()
+    .expireAfterWrite(30, TimeUnit.DAYS)
+    .build()!! // Token -> User ID
 
 fun main() {
     embeddedServer(

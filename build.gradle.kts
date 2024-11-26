@@ -45,6 +45,10 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-core:${exposed_version}")
     implementation("org.jetbrains.exposed:exposed-dao:${exposed_version}")
     implementation("org.jetbrains.exposed:exposed-jdbc:${exposed_version}")
+    implementation("org.jetbrains.exposed:exposed-kotlin-datetime:${exposed_version}")
+
+    // Caching
+    implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
 
     // Database drivers
     implementation("com.mysql:mysql-connector-j:9.0.0") // MySQL
