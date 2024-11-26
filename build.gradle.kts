@@ -33,6 +33,7 @@ dependencies {
     implementation("io.ktor:ktor-server-status-pages-jvm")
     implementation("io.ktor:ktor-server-content-negotiation-jvm")
     implementation("io.ktor:ktor-serialization-kotlinx-json-jvm")
+    implementation("io.ktor:ktor-server-auth-jwt")
 
     // Ktor server (WebSockets)
     implementation("io.ktor:ktor-server-websockets-jvm")
@@ -54,9 +55,16 @@ dependencies {
     implementation("com.mysql:mysql-connector-j:9.0.0") // MySQL
     implementation("org.mariadb.jdbc:mariadb-java-client:3.5.0") // MariaDB
 
+    // Password hashing
+    implementation("org.mindrot:jbcrypt:0.4")
+
+    // JWT library
+    implementation("com.auth0:java-jwt:4.4.0")
+
     // Logging
     implementation("ch.qos.logback:logback-classic:1.5.12")
 
     // Dotenv
     implementation("io.github.cdimascio:dotenv-kotlin:6.4.2")
+    implementation("io.ktor:ktor-server-auth-jwt-jvm:3.0.1")
 }

@@ -1,15 +1,19 @@
 package com.mikael.tictactoebackend
 
+import com.auth0.jwt.JWT
+import com.auth0.jwt.algorithms.Algorithm
 import com.github.benmanes.caffeine.cache.Cache
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.mikael.tictactoebackend.db.DatabaseUtils
-import com.mikael.tictactoebackend.routing.game.gameRouting
 import com.mikael.tictactoebackend.routing.match.matchRouting
+import com.mikael.tictactoebackend.routing.user.userRouting
 import io.github.cdimascio.dotenv.Dotenv
 import io.github.cdimascio.dotenv.dotenv
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.auth.jwt.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.contentnegotiation.*
@@ -46,9 +50,9 @@ data class ErrorResponse(val error: String) : Response(false)
 internal val serverDotEnv: Dotenv = dotenv()
 
 // Cache for storing logged in users tokens.
-val tokensCache: Cache<String, Long> = Caffeine.newBuilder()
+val jwtTokenCache: Cache<Long, String> = Caffeine.newBuilder()
     .expireAfterWrite(30, TimeUnit.DAYS)
-    .build()!! // Token -> User ID
+    .build()!! // UserID -> TokenID (UUID)
 
 fun main() {
     embeddedServer(
@@ -80,19 +84,41 @@ fun Application.module() {
             )
         }
     }
+    install(Authentication) {
+        jwt("auth-jwt") {
+            realm = "tic-tac-toe-game"
+            verifier(
+                JWT.require(Algorithm.HMAC256(JWT_TOKEN_SECRET))
+                    .withAudience(JWT_TOKEN_AUDIENCE)
+                    .withIssuer(JWT_TOKEN_ISSUER)
+                    .withClaimPresence("userId")
+                    .build()
+            )
+            validate { credential ->
+                val userId = credential.payload.getClaim("userId").asLong()!!
+                val tokenId = credential.jwtId!!
+                if (jwtTokenCache.getIfPresent(userId) == tokenId) {
+                    JWTPrincipal(credential.payload)
+                } else null
+            }
+            challenge { _, _ ->
+                call.respond(HttpStatusCode.Unauthorized, ErrorResponse("Invalid access token."))
+            }
+        }
+    }
 
     // Database
     DatabaseUtils.prepareDB()
 
     // Routing
     routing {
-        route("/match") {
-            matchRouting()
+        route("/user") {
+            userRouting()
             invalidRoute()
         }
 
-        route("/game") {
-            gameRouting()
+        route("/match") {
+            matchRouting()
             invalidRoute()
         }
 
