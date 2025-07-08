@@ -1,7 +1,7 @@
-package com.mikael.tictactoebackend.core
+package com.mikael.tictactoe.core
 
-import com.mikael.tictactoebackend.routing.match.GameSession
-import com.mikael.tictactoebackend.routing.match.Player
+import com.mikael.tictactoe.routing.match.GameSession
+import com.mikael.tictactoe.routing.match.Player
 import java.util.*
 
 /**

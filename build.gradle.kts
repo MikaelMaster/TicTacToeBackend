@@ -1,16 +1,14 @@
-@file:Suppress("WARNINGS")
-
 plugins {
-    kotlin("jvm") version "2.0.21"
-    id("io.ktor.plugin") version "3.0.1"
-    id("org.jetbrains.kotlin.plugin.serialization") version "2.0.21"
+    kotlin("jvm") version "2.2.0"
+    kotlin("plugin.serialization") version "2.2.0"
+    id("io.ktor.plugin") version "3.2.0"
 }
 
-group = "com.mikael"
+group = "com.mikael.tictactoe"
 version = "1.0.0"
 
 application {
-    mainClass.set("com.mikael.tictactoebackend.TicTacToeKt")
+    mainClass.set("com.mikael.tictactoe.ApplicationKt")
 
     val isDevelopment: Boolean = project.ext.has("development")
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
@@ -20,8 +18,6 @@ repositories {
     mavenCentral()
     maven("https://oss.sonatype.org/")
 }
-
-val exposed_version: String by project
 
 dependencies {
     // Ktor server
@@ -34,26 +30,26 @@ dependencies {
     implementation("io.ktor:ktor-server-content-negotiation-jvm")
     implementation("io.ktor:ktor-serialization-kotlinx-json-jvm")
     implementation("io.ktor:ktor-server-auth-jwt")
-
-    // Ktor server (WebSockets)
-    implementation("io.ktor:ktor-server-websockets-jvm")
+    implementation("io.ktor:ktor-server-websockets-jvm") // Websockets support
 
     // Ktor client
     implementation("io.ktor:ktor-client-core-jvm")
     implementation("io.ktor:ktor-client-apache-jvm")
 
     // Exposed
-    implementation("org.jetbrains.exposed:exposed-core:${exposed_version}")
-    implementation("org.jetbrains.exposed:exposed-dao:${exposed_version}")
-    implementation("org.jetbrains.exposed:exposed-jdbc:${exposed_version}")
-    implementation("org.jetbrains.exposed:exposed-kotlin-datetime:${exposed_version}")
+    val exposedVersion: String by project // defined in gradle.properties
+    implementation("org.jetbrains.exposed:exposed-core:${exposedVersion}")
+    implementation("org.jetbrains.exposed:exposed-dao:${exposedVersion}")
+    implementation("org.jetbrains.exposed:exposed-jdbc:${exposedVersion}")
+    implementation("org.jetbrains.exposed:exposed-kotlin-datetime:${exposedVersion}")
+    implementation("com.zaxxer:HikariCP:6.2.1") // HikariCP for connection pooling
+
+    // Database drivers for Exposed
+    implementation("com.mysql:mysql-connector-j:9.3.0") // MySQL driver
+    implementation("org.mariadb.jdbc:mariadb-java-client:3.5.3") // MariaDB driver
 
     // Caching
-    implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
-
-    // Database drivers
-    implementation("com.mysql:mysql-connector-j:9.0.0") // MySQL
-    implementation("org.mariadb.jdbc:mariadb-java-client:3.5.0") // MariaDB
+    implementation("com.github.ben-manes.caffeine:caffeine:3.2.1")
 
     // Password hashing
     implementation("org.mindrot:jbcrypt:0.4")
@@ -62,9 +58,8 @@ dependencies {
     implementation("com.auth0:java-jwt:4.4.0")
 
     // Logging
-    implementation("ch.qos.logback:logback-classic:1.5.12")
+    implementation("ch.qos.logback:logback-classic:1.5.18")
 
     // Dotenv
-    implementation("io.github.cdimascio:dotenv-kotlin:6.4.2")
-    implementation("io.ktor:ktor-server-auth-jwt-jvm:3.0.1")
+    implementation("io.github.cdimascio:dotenv-kotlin:6.5.1")
 }

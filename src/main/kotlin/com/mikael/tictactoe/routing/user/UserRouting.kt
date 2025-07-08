@@ -1,11 +1,13 @@
 @file:Suppress("DUPLICATES")
 
-package com.mikael.tictactoebackend.routing.user
+package com.mikael.tictactoe.routing.user
 
-import com.mikael.tictactoebackend.*
-import com.mikael.tictactoebackend.db.dbQuery
-import com.mikael.tictactoebackend.db.schema.user.User
-import com.mikael.tictactoebackend.db.schema.user.UsersTable
+import com.mikael.tictactoe.*
+import com.mikael.tictactoe.db.schema.user.User
+import com.mikael.tictactoe.db.schema.user.UsersTable
+import com.mikael.tictactoe.plugin.generateJWTAccessToken
+import com.mikael.tictactoe.plugin.jwtTokenCache
+import com.mikael.tictactoe.routing.ErrorResponse
 import io.ktor.http.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
@@ -19,6 +21,26 @@ import java.util.concurrent.TimeUnit
  * Routing for [User] creation and authentication.
  */
 internal fun Route.userRouting() {
+    post("/check-availability") {
+        val request = call.receive<UserCheckAvailabilityRequest>()
+
+        val emailLowercase = request.email.lowercase()
+        val foundUser = dbQuery {
+            User.find {
+                (UsersTable.nickname eq request.nickname) or
+                        (UsersTable.email eq emailLowercase)
+            }.limit(1).firstOrNull()
+        }
+
+        call.respond(
+            HttpStatusCode.OK,
+            UserCheckAvailabilityResponse(
+                foundUser?.nickname == request.nickname,
+                foundUser?.email == emailLowercase
+            )
+        )
+    }
+
     post("/register") {
         val request = call.receive<UserRegisterRequest>()
 
@@ -28,6 +50,7 @@ internal fun Route.userRouting() {
                 HttpStatusCode.BadRequest,
                 ErrorResponse("Nickname must contain only letters, numbers, and underscores.")
             )
+            return@post
         }
 
         // Email validation
@@ -37,6 +60,7 @@ internal fun Route.userRouting() {
                 HttpStatusCode.BadRequest,
                 ErrorResponse("Invalid email.")
             )
+            return@post
         }
 
         // Password validation
@@ -45,6 +69,7 @@ internal fun Route.userRouting() {
                 HttpStatusCode.BadRequest,
                 ErrorResponse("Password must be between 6 and 12 characters.")
             )
+            return@post
         }
 
         // Check if the user already exists with the same nickname or email
@@ -55,16 +80,22 @@ internal fun Route.userRouting() {
             }.limit(1).firstOrNull()
         }
         if (foundUser != null) {
+            if (foundUser.nickname == request.nickname && foundUser.email == emailLowercase) {
+                call.respond(
+                    HttpStatusCode.Conflict,
+                    ErrorResponse("Nickname and email already in use.")
+                )
+            }
             if (foundUser.nickname == request.nickname) {
                 call.respond(
                     HttpStatusCode.Conflict,
-                    ErrorResponse("Nickname already taken.")
+                    ErrorResponse("Nickname already in use.")
                 )
             }
             if (foundUser.email == emailLowercase) {
                 call.respond(
                     HttpStatusCode.Conflict,
-                    ErrorResponse("Email already taken.")
+                    ErrorResponse("Email already in use.")
                 )
             }
             return@post
@@ -99,7 +130,7 @@ internal fun Route.userRouting() {
             return@post
         }
 
-        if (!checkPassword(request.password, user.passwordHash)) {
+        if (!checkPassword(request.password, user.passwordHash!!)) {
             call.respond(
                 HttpStatusCode.Unauthorized,
                 ErrorResponse("Invalid password.")
@@ -148,7 +179,7 @@ internal fun Route.userRouting() {
             // Invalidate the JWT token, so the user will need to login again
             jwtTokenCache.invalidate(user.id.value)
 
-            call.respond(HttpStatusCode.OK, Response(true))
+            call.respond(HttpStatusCode.NoContent)
         }
     }
 }

@@ -1,21 +1,68 @@
 @file:Suppress("DUPLICATES")
 
-package com.mikael.tictactoebackend.routing.match
+package com.mikael.tictactoe.routing.match
 
-import com.mikael.tictactoebackend.ErrorResponse
-import com.mikael.tictactoebackend.core.TicTacToeGame
+import com.github.benmanes.caffeine.cache.Cache
+import com.github.benmanes.caffeine.cache.Caffeine
+import com.mikael.tictactoe.core.TicTacToeGame
+import com.mikael.tictactoe.db.schema.match.Match
+import com.mikael.tictactoe.dbQuery
+import com.mikael.tictactoe.routing.ErrorResponse
 import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 import io.ktor.websocket.*
+import java.util.*
 
 /**
  * Routing for the match endpoints.
  */
 internal fun Route.matchRouting() {
-    webSocket("/ws/{gameId}") {
+    get("/results/{matchId}") {
+        val matchId = call.parameters["matchId"]?.let { UUID.fromString(it) }
+        if (matchId == null) {
+            call.respond(HttpStatusCode.BadRequest, ErrorResponse("Match ID parameter is required."))
+            return@get
+        }
+
+        val match = dbQuery { Match.findById(matchId) }
+        if (match == null) {
+            call.respond(HttpStatusCode.NotFound, ErrorResponse("Match not found."))
+            return@get
+        }
+
+        if (match.winner != null) {
+            call.respond(
+                HttpStatusCode.UnprocessableEntity,
+                ErrorResponse("Cannot get the results of an unfinished match.")
+            )
+            return@get
+        }
+
+        // call.respond(HttpStatusCode.OK, MatchResultsResponse(MatchResults.fromMatch(match)))
+    }
+
+    route("/ws") {
+        // Cache for storing queue websocket sessions.
+        val queueWebSocketSessions: Cache<Long, DefaultWebSocketSession> = Caffeine.newBuilder()
+            .build()!! // UserID -> DefaultWebSocketSession
+
+        webSocket("/queue") {
+
+        }
+
+        // Cache for storing play websocket sessions.
+        val playWebSocketSessions: Cache<Long, DefaultWebSocketSession> = Caffeine.newBuilder()
+            .build()!! // UserID -> DefaultWebSocketSession
+
+        webSocket("/play/{matchId}") {
+
+        }
+    }
+
+    webSocket("/play/{gameId}") {
         val gameId = call.parameters["gameId"]
         if (gameId == null) {
             call.respond(HttpStatusCode.BadRequest, ErrorResponse("Game ID parameter is required."))
@@ -95,7 +142,7 @@ internal fun Route.matchRouting() {
             if (TicTacToeGame.waitingQueue.size < 2) {
                 // If there is no other player in the queue, the player is added to the queue
                 // and an OK response is sent back. The player will be waiting for another player to join.
-                call.respond(HttpStatusCode.Accepted, QueueJoinResponse(player))
+               // call.respond(HttpStatusCode.Accepted, QueueJoinResponse(player))
             }
 
             // If there are two players in the queue, a new game session will be created to start the game.
@@ -107,7 +154,7 @@ internal fun Route.matchRouting() {
             val gameSession = GameSession(playerO = playerO, playerX = playerX)
             TicTacToeGame.gameSessions.add(gameSession)
 
-            call.respond(HttpStatusCode.OK, QueueJoinResponse(player))
+         //   call.respond(HttpStatusCode.OK, QueueJoinResponse(player))
         }
 
         post("/leave") {

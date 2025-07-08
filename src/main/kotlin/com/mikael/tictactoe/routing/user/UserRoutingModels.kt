@@ -1,10 +1,16 @@
-package com.mikael.tictactoebackend.routing.user
+package com.mikael.tictactoe.routing.user
 
-import com.mikael.tictactoebackend.Response
-import com.mikael.tictactoebackend.db.schema.user.User
+import com.mikael.tictactoe.db.schema.user.User
+import com.mikael.tictactoe.routing.Response
 import kotlinx.serialization.Serializable
 
 // Request models - Start
+@Serializable
+data class UserCheckAvailabilityRequest(
+    val nickname: String,
+    val email: String
+)
+
 @Serializable
 data class UserRegisterRequest(
     val nickname: String,
@@ -14,17 +20,23 @@ data class UserRegisterRequest(
 
 @Serializable
 data class UserLoginRequest(
-    val identifier: String, // Can be the nickname or the email
+    val identifier: String, // Can be either a nickname or an email
     val password: String
 )
 // Request models - End
 
 // Response models - Start
 @Serializable
+data class UserCheckAvailabilityResponse(
+    val nicknameAlreadyInUse: Boolean,
+    val emailAlreadyInUse: Boolean
+) : Response(true)
+
+@Serializable
 data class UserResponse(
     val id: Long,
     val nickname: String,
-    val email: String
+    val email: String?
 ) {
     companion object {
         /**

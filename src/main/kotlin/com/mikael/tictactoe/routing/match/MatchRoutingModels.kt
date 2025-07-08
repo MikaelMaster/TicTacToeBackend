@@ -1,6 +1,5 @@
-package com.mikael.tictactoebackend.routing.match
+package com.mikael.tictactoe.routing.match
 
-import com.mikael.tictactoebackend.Response
 import io.ktor.websocket.*
 import kotlinx.serialization.Serializable
 import java.util.*
@@ -70,6 +69,36 @@ data class QueueLeaveRequest(val playerId: String)
 // Request models - End
 
 // Response models - Start
+/*
+* @Serializable
+data class MatchResults(
+    val player1: UserResponse,
+    val player2: UserResponse,
+    val winner: UserResponse?,
+    val isDraw: Boolean,
+    val createdAt: LocalDateTime,
+    val finishedAt: LocalDateTime?
+) {
+    companion object {
+        /**
+         * Returns a [MatchResults] from a [Match].
+         */
+        fun fromMatch(match: Match): MatchResults {
+            return MatchResults(
+                UserResponse.fromUser(match.player1),
+                UserResponse.fromUser(match.player2),
+                match.winner?.let { UserResponse.fromUser(it) },
+                match.isDraw,
+                match.createdAt,
+                match.finishedAt
+            )
+        }
+    }
+}
+
+@Serializable
+data class MatchResultsResponse(val results: MatchResults) : Response(true)
+
 /**
  * Queue join response model.
  *
@@ -87,4 +116,5 @@ data class QueueJoinResponse(val player: Player) : Response(true)
  */
 @Serializable
 data class GameStatusResponse(val game: GameSession) : Response(true)
+* */
 // Response models - End
